@@ -100,11 +100,15 @@ class Uploder(object):
 
     def upload(self):
         logging.info("Start uploading")
-        query = db_session.query(UploadedData) \
+        data = db_session.query(UploadedData) \
             .filter(UploadedData.is_uploaded == False) \
-            .limit(MAX_PHOTOS)
+            .limit(MAX_PHOTOS).all()
 
-        for row in query:
+        if not data:
+            logging.info('There are no data to upload')
+            return
+
+        for row in data:
             row.is_uploaded = True
             row.save()
 

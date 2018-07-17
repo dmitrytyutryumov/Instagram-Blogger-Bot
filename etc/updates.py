@@ -9,11 +9,11 @@ from selenium.common.exceptions import NoSuchElementException
 from api.InstagramAPI import InstagramAPI
 from db_settings import db_session
 from db_settings.model import UploadedData
-from .constants import MAX_PHOTOS, USER, PASSWORD, FILES_DIR
+from .constants import MAX_PHOTOS, USER, PASSWORD, FILES_DIR, ACCOUNTS
 
 INSTAGRAM_URL = "https://www.instagram.com/"
 PHOTO_XPATH = '//a[contains(@href, "taken-by={username}")]'
-DESCRIPTION_BROTHER_XPATH = '//div/ul/li/a[contains(@href, "{username}")]'
+DESCRIPTION_BROTHER_XPATH = '//div/ul/li/{div}a[contains(@href, "{username}")]'
 
 
 class Dowloader(object):
@@ -29,9 +29,14 @@ class Dowloader(object):
         return [i.get_attribute('href') for i in tags]
 
     def get_description(self, username):
-        brother_tag = self.driver.find_element_by_xpath(
-            DESCRIPTION_BROTHER_XPATH.format(username=username)
-        )
+        try:
+            brother_tag = self.driver.find_element_by_xpath(
+                DESCRIPTION_BROTHER_XPATH.format(div='div/', username=username)
+            )
+        except NoSuchElementException:
+            brother_tag = self.driver.find_element_by_xpath(
+                DESCRIPTION_BROTHER_XPATH.format(div='', username=username)
+            )
 
         description = brother_tag.find_element_by_xpath('..') \
             .find_element_by_tag_name('span').text
@@ -49,22 +54,22 @@ class Dowloader(object):
             .filter(UploadedData.creation_date <= now).all()
         return [url.url for url in data]
 
-    def download(self, username):
-        logging.info(f'Check links for {username}')
-
-        links = self.find_links(username)
+    def download(self):
         uploaded_urls = self.uploaded_links()
+        for username in ACCOUNTS:
+            logging.info(f'Check links for {username}')
+            links = self.find_links(username)
 
-        for link in links:
-            self.driver.get(link)
-            date = self.get_post_date()
+            for link in links:
+                self.driver.get(link)
+                date = self.get_post_date()
 
-            if datetime.utcnow() - timedelta(
-                    days=1) <= date <= datetime.utcnow():
-                try:
-                    self.download_video(username, uploaded_urls)
-                except NoSuchElementException:
-                    self.download_photo(username, uploaded_urls)
+                if datetime.utcnow() - timedelta(
+                        days=3) <= date <= datetime.utcnow():
+                    try:
+                        self.download_video(username, uploaded_urls)
+                    except NoSuchElementException:
+                        self.download_photo(username, uploaded_urls)
 
     def download_video(self, username, uploaded_urls):
         video = self.driver.find_element_by_tag_name('video')

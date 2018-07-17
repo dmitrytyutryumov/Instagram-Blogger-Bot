@@ -18,13 +18,13 @@ services:
     networks:
       - instabot
 
-  like_bot: &bot
+  bot:
     build:
       context: .
       args:
         - PROJECT_DIR=/opt/instbot
     image: insta_bot
-    container_name: like_bot
+    container_name: ibot
     volumes:
       - .:/opt/instbot
     env_file:
@@ -32,11 +32,6 @@ services:
     networks:
       - instabot
     restart: on-failure
-    command: "celery worker -A tasks.likes -B -l info"
-
-  uploader_bot:
-    <<: *bot
-    container_name: uploader_bot
     depends_on:
       - chrome
       - selenium-hub
@@ -48,7 +43,7 @@ services:
     command:
       - "sh"
       - "-c"
-      - "alembic upgrade head && celery worker -A tasks.uploader -B -l info"
+      - "alembic upgrade head && celery worker -A tasks -B -l info --autoscale=3,1"
 
   amqp:
     container_name: bot_amqp

@@ -76,7 +76,7 @@ class Dowloader(object):
         cover_photo = video.get_attribute('poster')
         video_url = video.get_attribute('src')
         description = self.get_description(username)
-        if not video in uploaded_urls:
+        if video_url not in uploaded_urls:
             UploadedData(
                     url=video_url, description=description, is_video=True,
                     cover_photo=cover_photo, is_uploaded=False)\
@@ -87,7 +87,7 @@ class Dowloader(object):
         img = self.driver.find_element_by_xpath('//img[@srcset]')
         url = img.get_attribute('srcset').split(',')[-1].split(' ')[0]
         description = self.get_description(username)
-        if not url in uploaded_urls:
+        if url not in uploaded_urls:
             UploadedData(
                     url=url, description=description,
                     is_uploaded=False)\

@@ -5,9 +5,9 @@ from selenium import webdriver
 
 from etc import Dowloader, Uploder
 from etc.constants import (
-    ACCOUNTS, AMQP_URL, DRIVER_PATH,
-    DOWNLOAD_SCHEDULE_HOURS, UPLOAD_SCHEDULE_HOURS, DOWNLOAD_SCHEDULE_MINS,
-    UPLOAD_SCHEDULE_MINS)
+    AMQP_URL, DRIVER_PATH, DOWNLOAD_SCHEDULE_HOURS, UPLOAD_SCHEDULE_HOURS,
+    DOWNLOAD_SCHEDULE_MINS, UPLOAD_SCHEDULE_MINS
+)
 
 app = Celery(broker=AMQP_URL)
 
@@ -22,8 +22,7 @@ def dowload_data():
         command_executor=DRIVER_PATH,
         desired_capabilities=webdriver.DesiredCapabilities.CHROME
     )
-    downloader = Dowloader(driver)
-    [downloader.download(name) for name in ACCOUNTS]
+    Dowloader(driver).download()
     driver.close()
 
 

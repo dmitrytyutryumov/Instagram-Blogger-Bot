@@ -65,7 +65,7 @@ class Dowloader(object):
                 date = self.get_post_date()
 
                 if datetime.utcnow() - timedelta(
-                        days=3) <= date <= datetime.utcnow():
+                        days=1) <= date <= datetime.utcnow():
                     try:
                         self.download_video(username, uploaded_urls)
                     except NoSuchElementException:

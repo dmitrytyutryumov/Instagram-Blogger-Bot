@@ -13,7 +13,7 @@ from .constants import MAX_PHOTOS, USER, PASSWORD, FILES_DIR, ACCOUNTS
 
 INSTAGRAM_URL = "https://www.instagram.com/"
 PHOTO_XPATH = '//a[contains(@href, "taken-by={username}")]'
-DESCRIPTION_BROTHER_XPATH = '//div/ul/li/{div}a[contains(@href, "{username}")]'
+DESCRIPTION_BROTHER_XPATH = '//article/div/div/ul/li//span'
 
 
 class Dowloader(object):
@@ -29,17 +29,9 @@ class Dowloader(object):
         return [i.get_attribute('href') for i in tags]
 
     def get_description(self, username):
-        try:
-            brother_tag = self.driver.find_element_by_xpath(
-                DESCRIPTION_BROTHER_XPATH.format(div='div/', username=username)
-            )
-        except NoSuchElementException:
-            brother_tag = self.driver.find_element_by_xpath(
-                DESCRIPTION_BROTHER_XPATH.format(div='', username=username)
-            )
-
-        description = brother_tag.find_element_by_xpath('..') \
-            .find_element_by_tag_name('span').text
+        description = self.driver.find_element_by_xpath(
+            DESCRIPTION_BROTHER_XPATH
+        ).text
         return '\n'.join([description, f'@{username}'])
 
     def get_post_date(self):

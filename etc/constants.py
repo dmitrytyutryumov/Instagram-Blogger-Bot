@@ -24,9 +24,9 @@ DRIVER_PATH = os.getenv('DRIVER_URL', 'http://selenium-hub:4444/wd/hub')
 DB_URL = os.getenv('DB_URL', 'sqlite+pysqlite:///ibot.db')
 
 # Config for celery tasks
-LIKES_SCHEDULE_HOURS = os.getenv('LIKES_SCHEDULE', '*/3')
-UPLOAD_SCHEDULE_HOURS = os.getenv('UPLOAD_SCHEDULE', '*/5')
-DOWNLOAD_SCHEDULE_HOURS = os.getenv('DOWNLOAD_SCHEDULE', '8, 16, 23')
+LIKES_SCHEDULE_HOURS = os.getenv('LIKES_SCHEDULE_HOURS', '*/3')
+UPLOAD_SCHEDULE_HOURS = os.getenv('UPLOAD_SCHEDULE_HOURS', '*/5')
+DOWNLOAD_SCHEDULE_HOURS = os.getenv('DOWNLOAD_SCHEDULE_HOURS', '8, 16, 23')
 
 LIKES_SCHEDULE_MINS = os.getenv('LIKES_SCHEDULE_MINS', 0)
 UPLOAD_SCHEDULE_MINS = os.getenv('UPLOAD_SCHEDULE_MINS', 0)

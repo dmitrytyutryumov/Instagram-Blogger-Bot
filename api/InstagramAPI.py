@@ -138,8 +138,8 @@ class InstagramAPI:
                            'experiment': 'ig_android_profile_contextual_feed'})
         return self.SendRequest('qe/expose/', self.generateSignature(data))
 
-    def logout(self):
-        logout = self.SendRequest('accounts/logout/')
+    def logout(self, *args, **kwargs):
+        self.SendRequest('accounts/logout/')
 
     def upload_photo(self, photo, caption=None, upload_id=None, is_sidecar=None):
         if upload_id is None:

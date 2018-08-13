@@ -38,16 +38,20 @@ class Dowloader(object):
         el = self.driver.find_element_by_tag_name('time')
         return parser.parse(el.get_attribute('datetime')).replace(tzinfo=None)
 
-    def uploaded_links(self):
+    def is_dublicate(self, url, description, is_video=False):
         now = datetime.utcnow()
         week_ago = now - timedelta(days=7)
-        data = db_session.query(UploadedData.url) \
+        data = db_session.query(UploadedData.url, UploadedData.description) \
             .filter(UploadedData.creation_date > week_ago) \
+            .filter(UploadedData.is_video == is_video) \
             .filter(UploadedData.creation_date <= now).all()
-        return [url.url for url in data]
+
+        for row in data:
+            if row.url == url or row.description == description:
+                return False
+        return True
 
     def download(self):
-        uploaded_urls = self.uploaded_links()
         for username in ACCOUNTS:
             logging.info(f'Check links for {username}')
             links = self.find_links(username)
@@ -59,27 +63,27 @@ class Dowloader(object):
                 if datetime.utcnow() - timedelta(
                         days=1) <= date <= datetime.utcnow():
                     try:
-                        self.download_video(username, uploaded_urls)
+                        self.download_video(username)
                     except NoSuchElementException:
-                        self.download_photo(username, uploaded_urls)
+                        self.download_photo(username)
 
-    def download_video(self, username, uploaded_urls):
+    def download_video(self, username):
         video = self.driver.find_element_by_tag_name('video')
         cover_photo = video.get_attribute('poster')
         video_url = video.get_attribute('src')
         description = self.get_description(username)
-        if video_url not in uploaded_urls:
+        if self.is_dublicate(video_url, description, is_video=True):
             UploadedData(
                     url=video_url, description=description, is_video=True,
                     cover_photo=cover_photo, is_uploaded=False)\
                 .save()
             logging.info(f'Added new video link for {username}')
 
-    def download_photo(self, username, uploaded_urls):
+    def download_photo(self, username):
         img = self.driver.find_element_by_xpath('//img[@srcset]')
         url = img.get_attribute('srcset').split(',')[-1].split(' ')[0]
         description = self.get_description(username)
-        if url not in uploaded_urls:
+        if self.is_dublicate(url, description):
             UploadedData(
                     url=url, description=description,
                     is_uploaded=False)\
